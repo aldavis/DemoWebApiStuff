@@ -26,7 +26,7 @@ namespace DemoStuff.Controllers
             var connectionString =
                 "Data Source=localhost;Initial Catalog=Einstein.Workflow;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 
-            var list = new List<WorkItem>();
+            var list = new List<TaskList>();
 
             using (var connection = new SqlConnection(connectionString))
             {
@@ -38,20 +38,21 @@ namespace DemoStuff.Controllers
 
                     var reader = command.ExecuteReader();
 
-                    while (reader.Read())
-                    {
-                        var workItem = new WorkItem()
-                        {
-                            CreatedBy = reader["CreatedBy"].ToString(),
-                            Id = Convert.ToInt32(reader[0]),
-                        };
+                    //while (reader.Read())
+                    //{
 
-                        list.Add(workItem);
+                    //    var workitem2 = new TaskList
+                    //    {
+                    //        CreatedBy = "bill",
+                    //        Id = 8
+                    //    };
 
-                        Console.WriteLine("boom");
+                    //    list.Add(workItem);
 
-                        Console.WriteLine(reader["WorkflowId"].ToString());
-                    }
+                    //    Console.WriteLine("boom");
+
+                    //    Console.WriteLine(reader["WorkflowId"].ToString());
+                    //}
 
                     connection.Close();
                 }
@@ -73,7 +74,7 @@ namespace DemoStuff.Controllers
 
             await using (var connection = new SqlConnection(connectionString))
             {
-                var results = await connection.QueryAsync<WorkItem>("select * from workflow");
+                var results = await connection.QueryAsync<TaskList>("select * from workflow");
 
                 foreach (var result in results)
                 {
@@ -140,6 +141,34 @@ namespace DemoStuff.Controllers
             }
 
             return Ok("good");
+        }
+
+        [HttpGet("buildlist")]
+        public TaskList BuildList()
+        {
+
+            var list = new TaskList
+            {
+                CreatedBy = "alex",
+                Id = 5,
+                Status = "open",
+                Tasks = new List<ToDoItem>
+                {
+                    new ToDoItem{Id = 1,Queue = new TaskQueue{QueueId = 1,QueueName = "publix"},Name = "get milk"},
+                    new ToDoItem{Id = 1,Queue = new TaskQueue{QueueId = 1,QueueName = "publix"},Name = "get bread"},
+                    new ToDoItem{Id = 1,Queue = new TaskQueue{QueueId = 1,QueueName = "publix"},Name = "get ice"},
+                }
+            };
+
+            foreach (var doItem in list.Tasks)
+            {
+                Console.WriteLine(doItem.Name);
+                Console.WriteLine(doItem.Queue.QueueName);
+            }
+
+
+
+            return list;
         }
     }
 }
